@@ -1,0 +1,10 @@
+name = "lean_in_lean"
+version = "1.0.0"
+defaultTargets = ["lean_in_lean"]
+
+[[lean_lib]]
+name = "LeanInLean"
+
+[[lean_exe]]
+name = "lean_in_lean"
+root = "Main"
