@@ -16,6 +16,9 @@ MODULES = [
     ("LeanInLean.FrontendAndMeta", ROOT / "LeanInLean" / "FrontendAndMeta.lean"),
     ("LeanInLean.CompilerAndRC", ROOT / "LeanInLean" / "CompilerAndRC.lean"),
     ("LeanInLean.RuntimeAndOlean", ROOT / "LeanInLean" / "RuntimeAndOlean.lean"),
+    ("LeanInLean.PrettyPrintAndKernelDeep", ROOT / "LeanInLean" / "PrettyPrintAndKernelDeep.lean"),
+    ("LeanInLean.ExternAndEmitC", ROOT / "LeanInLean" / "ExternAndEmitC.lean"),
+    ("LeanInLean.ConcurrencyAndLake", ROOT / "LeanInLean" / "ConcurrencyAndLake.lean"),
     ("LeanInLean.FullStack", ROOT / "LeanInLean" / "FullStack.lean"),
 ]
 ALLOWED_STD_AXIOMS = {"propext", "Classical.choice", "Quot.sound"}

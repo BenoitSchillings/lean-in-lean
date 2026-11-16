@@ -2,4 +2,7 @@ import LeanInLean.CoreKernel
 import LeanInLean.FrontendAndMeta
 import LeanInLean.CompilerAndRC
 import LeanInLean.RuntimeAndOlean
+import LeanInLean.PrettyPrintAndKernelDeep
+import LeanInLean.ExternAndEmitC
+import LeanInLean.ConcurrencyAndLake
 import LeanInLean.FullStack
