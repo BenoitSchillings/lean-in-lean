@@ -5,4 +5,5 @@ import LeanInLean.RuntimeAndOlean
 import LeanInLean.PrettyPrintAndKernelDeep
 import LeanInLean.ExternAndEmitC
 import LeanInLean.ConcurrencyAndLake
+import LeanInLean.Lean4LeanAudits
 import LeanInLean.FullStack

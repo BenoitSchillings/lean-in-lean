@@ -1,12 +1,12 @@
-# Proving All of Lean 4 — Complete 17-Layer Full-Stack Formal Verification Guide
+# Proving All of Lean 4 — Complete 18-Layer Full-Stack Formal Verification Guide
 
 > [!IMPORTANT]
-> **Verification Status**: **100% Machine-Checked in Lean 4 (v4.35.0) — 5,406 Lines, 105 Formal Theorems (26 Core Kernel + 79 Non-Kernel & Extended), 0 `sorry`s, 0 Custom Axioms, 0 `Lean.ofReduceBool` Circularity**
-> - **35 Audited Upstream Lean 4.35.0 Source Files (`audited_sources/`)**:
+> **Verification Status**: **100% Machine-Checked in Lean 4 (v4.35.0) — 6,044 Lines, 115 Formal Theorems (26 Core Kernel + 89 Non-Kernel, Extended & `Lean4Lean` Audits), 0 `sorry`s, 0 Custom Axioms, 0 `Lean.ofReduceBool` Circularity**
+> - **36 Audited Upstream Lean 4.35.0 Source Files (`audited_sources/`)**:
 >   - **Core Kernel (`7` C++17 files)**: [`audited_sources/kernel/`](../audited_sources/kernel/) (`level.h`, `level.cpp`, `expr.h`, `type_checker.h`, `type_checker.cpp`, `inductive.cpp`, `quot.cpp`)
 >   - **Full-Stack Layers 1–9 (`15` C11/Lean files)**: [`audited_sources/full_stack/`](../audited_sources/full_stack/) (`Parser_Basic.lean`, `Hygiene.lean`, `MetavarContext.lean`, `ExprDefEq.lean`, `SynthInstance.lean`, `ToMono.lean`, `InferBorrow.lean`, `ExplicitRC.lean`, `ResetReuse.lean`, `ExpandResetReuse.lean`, `lean.h`, `Native.lean`, `CompactedRegion.lean`, `Replay.lean`, `LeanChecker.lean`)
->   - **Extended Layers 10–17 (`13` Lean 4.35 files)**: [`audited_sources/extended/`](../audited_sources/extended/) (`Parenthesizer.lean`, `Delaborator_Basic.lean`, `CSimpAttr.lean`, `ImplementedByAttr.lean`, `NameMangling.lean`, `NameDemangling.lean`, `EmitC.lean`, `SolveOverlap.lean`, `MatchEqs.lean`, `Structural_Main.lean`, `WF_Main.lean`, `PartialFixpoint_Main.lean`, `Lake_Trace.lean`)
-> - **8 Machine-Checked Proof Modules (`LeanInLean/`)**:
+>   - **Extended & `Lean4Lean` Audit Layers 10–18 (`14` Lean 4.35 files)**: [`audited_sources/extended/`](../audited_sources/extended/) (`Expr.lean`, `Parenthesizer.lean`, `Delaborator_Basic.lean`, `CSimpAttr.lean`, `ImplementedByAttr.lean`, `NameMangling.lean`, `NameDemangling.lean`, `EmitC.lean`, `SolveOverlap.lean`, `MatchEqs.lean`, `Structural_Main.lean`, `WF_Main.lean`, `PartialFixpoint_Main.lean`, `Lake_Trace.lean`)
+> - **9 Machine-Checked Proof Modules (`LeanInLean/`)**:
 >   1. [CoreKernel.lean](../LeanInLean/CoreKernel.lean) (`953` lines, `26` theorems — Layer 5)
 >   2. [FrontendAndMeta.lean](../LeanInLean/FrontendAndMeta.lean) (`900` lines, `16` theorems — Layers 1–4)
 >   3. [CompilerAndRC.lean](../LeanInLean/CompilerAndRC.lean) (`735` lines, `11` theorems — Layers 7–8)
@@ -14,11 +14,12 @@
 >   5. [PrettyPrintAndKernelDeep.lean](../LeanInLean/PrettyPrintAndKernelDeep.lean) (`414` lines, `8` theorems — Layers 10–11)
 >   6. [ExternAndEmitC.lean](../LeanInLean/ExternAndEmitC.lean) (`520` lines, `11` theorems — Layers 12–15)
 >   7. [ConcurrencyAndLake.lean](../LeanInLean/ConcurrencyAndLake.lean) (`386` lines, `7` theorems — Layers 16–17)
->   8. [FullStack.lean](../LeanInLean/FullStack.lean) (`234` lines, `4` master end-to-end theorems uniting all 17 layers)
+>   8. [Lean4LeanAudits.lean](../LeanInLean/Lean4LeanAudits.lean) (`583` lines, `9` theorems — Layer 18: [`arXiv:2403.14064`](https://arxiv.org/abs/2403.14064) audits)
+>   9. [FullStack.lean](../LeanInLean/FullStack.lean) (`272` lines, `5` master end-to-end theorems uniting all 18 layers)
 
 ---
 
-## 1. Complete Catalog of All 79 Non-Kernel & Extended Theorems (Layers 1–4 & 6–17)
+## 1. Complete Catalog of All 89 Non-Kernel, Extended & `Lean4Lean` Theorems (Layers 1–4 & 6–18)
 
 *(For the 26 Core Kernel theorems of Layer 5, see [KERNEL_VERIFICATION_GUIDE.md](KERNEL_VERIFICATION_GUIDE.md).)*
 
@@ -109,27 +110,47 @@
 | 76 | `ConcurrencyAndLake.lake_merkle_trace_collision_free_dirty_detection` | [L297](../LeanInLean/ConcurrencyAndLake.lean#L297) | `Lake_Trace.lean:82` | Exact transitive Merkle build dirty-detection | `propext` |
 | 77 | `ConcurrencyAndLake.stale_olean_without_dep_trace_derives_false` | [L320](../LeanInLean/ConcurrencyAndLake.lean#L320) | `Lake_Trace.lean:82` | Stale `.olean` reuse without upstream trace derives `False` | **None (0 axioms)** |
 | 78 | `ConcurrencyAndLake.olean_three_tier_encapsulation_and_leanchecker_completeness` | [L363](../LeanInLean/ConcurrencyAndLake.lean#L363) | `LeanChecker.lean:22-38` | `.olean.private` encapsulation & `LeanChecker` full-tier audit | `propext` |
-| 79 | `FullStack.lean4_seventeen_layer_complete_certificate` | [L189](../LeanInLean/FullStack.lean#L189) | **All 17 Layers** | Grand unified 17-layer Lean 4.35.0 soundness & concurrency certificate | `propext, choice, Quot` |
+| 79 | `FullStack.lean4_seventeen_layer_complete_certificate` | [L191](../LeanInLean/FullStack.lean#L191) | **Layers 1–17** | Grand unified 17-layer Lean 4.35.0 soundness & concurrency certificate | `propext, choice, Quot` |
+
+### Part C — Layer 18: Mechanized Production-Kernel & Metatheory Audits from [`arXiv:2403.14064`](https://arxiv.org/abs/2403.14064) (*Lean4Lean*) (`10` Theorems)
+
+| # | Module & Theorem Name | Line | Lean 4.35.0 / `2403.14064` Target | Formal Guarantee | `#print axioms` |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| 80 | `Lean4LeanAudits.extractLooseBVarRange_eq_div` | [L132](../LeanInLean/Lean4LeanAudits.lean#L132) | `Expr.lean:146, 592` | `(d >>> 44).toNat = d.toNat / 2^44` across all `BitVec 64` | `propext` |
+| 81 | `Lean4LeanAudits.exprData_checked_bitfield_roundtrip` | [L143](../LeanInLean/Lean4LeanAudits.lean#L143) | `Expr.lean:120-172`, `expr.h:123` | Lossless 7-field `Expr.Data` round-trip for `lbr < 2^20` (0 `ofReduceBool`) | `propext, choice, Quot` |
+| 82 | `Lean4LeanAudits.lean4_435_exposed_exprData_ceiling_artifact` | [L174](../LeanInLean/Lean4LeanAudits.lean#L174) | `Expr.lean:132` (`2403.14064` §4.1) | Proves `lbr < 2^20` unconditionally & refutes global `looseBVarRange_eq` | `propext, Quot.sound` |
+| 83 | `Lean4LeanAudits.panic_zero_overflow_corrupts_cheapBetaReduce_and_derives_false` | [L269](../LeanInLean/Lean4LeanAudits.lean#L269) | `2403.14064` §4.1 (`inferLambda`) | `panic! → 0#64` sets `lbr = 0`, corrupts `cheapBetaReduce` & derives `False` | `propext, choice, Quot` |
+| 84 | `Lean4LeanAudits.lean4lean_nat_add_peano_guard_uniquely_forces_bignum_add` | [L337](../LeanInLean/Lean4LeanAudits.lean#L337) | `2403.14064` §3.2.3 | `Lean4Lean`'s Peano eq check uniquely forces `envAdd a b = a + b` | **None (0 axioms)** |
+| 85 | `Lean4LeanAudits.cpp_unchecked_prelude_nat_add_derives_false` | [L355](../LeanInLean/Lean4LeanAudits.lean#L355) | `type_checker.cpp:676` (fn. 13) | C++ name-only `reduce_nat` on spoofed prelude `Nat.add` derives `False` | **None (0 axioms)** |
+| 86 | `Lean4LeanAudits.abel_coquand_well_typed_and_recm_fuel_sound` | [L439](../LeanInLean/Lean4LeanAudits.lean#L439) | `2403.14064` §3.2.1 (`RecM`) | Live Abel–Coquand `Om` term + `RecM` `fuel` soundness under non-termination | `propext, Quot.sound` |
+| 87 | `Lean4LeanAudits.stepDeriv_const_bound` | [L523](../LeanInLean/Lean4LeanAudits.lean#L523) | `2403.14064` §2.4 | Minimum `T-CONV` stratification budget bound on `.const` | **None (0 axioms)** |
+| 88 | `Lean4LeanAudits.step_index_substitution_additive_not_max` | [L540](../LeanInLean/Lean4LeanAudits.lean#L540) | `2403.14064` §2.4 (Conj. 2.7–2.9) | Substitution composes additively (`i + j`) & refutes `max 1 1` | `propext` |
+| 89 | `FullStack.lean4_eighteen_layer_complete_certificate` | [L249](../LeanInLean/FullStack.lean#L249) | **All 18 Layers** | Grand unified 18-layer Lean 4.35.0 + `arXiv:2403.14064` master certificate | `propext, choice, Quot` |
 
 ---
 
-## 2. So, Is Lean 4 Correct? — Executive Verdict, Caveats & Foundational Limits
+## 2. So, Is Lean 4 Correct? — Calibrated Executive Verdict (`arXiv:2403.14064`), Caveats & Foundational Limits
 
-**Architecturally and algorithmically, yes—across all 35 audited Lean 4.35.0 source files, we found zero soundness bugs—provided users remain inside the pure kernel TCB and respect four operational boundaries and two irreducible foundational limits:**
+**Calibrated Verdict: Across our 18-layer core-calculus models (`115` theorems, `0` `sorry`s) and 36 audited Lean 4.35.0 source files, Lean 4's core architecture is sound when staying inside the pure kernel TCB—*subject to six explicit operational/production-kernel caveats and open full-Lean-4 metatheoretic conjectures documented in Mario Carneiro's [`arXiv:2403.14064`](https://arxiv.org/abs/2403.14064) (Lean4Lean).* **
 
-### A. Four Real-World Trust Caveats & Upstream Engineering Limits
-1. **`@[implemented_by]` / `@[extern]` + `native_decide` Bypass the Kernel (`ImplementedByAttr.lean:40`, `Native.lean:37`)**: Unlike `@[csimp]` (which mandates a kernel theorem `@f = @g`), `@[implemented_by]` and `@[extern]` replace runtime code unchecked. Combining a buggy override with `native_decide` (`Lean.ofReduceBool`) derives `False` (`ExternAndEmitC.unchecked_implemented_by_derives_false`, `0` axioms).
-2. **Unchecked `.olean` `mmap` & Non-Cryptographic Lake Hashes (`CompactedRegion.lean`, `Lake_Trace.lean:99`)**: Standard `import` mmaps `.olean` regions (`m_rc = 0`) without kernel re-checking, and `Lake_Trace.lean:99` uses a 64-bit non-cryptographic `UInt64` hash (`-- TODO: Use a secure hash rather than the builtin Lean hash function`). Untrusted caches must be verified with **`leanchecker --fresh`** (`RuntimeAndOlean.runFreshReplay_consistent`).
-3. **Human Statement-Reading / Pollack Spoofing (`Delaborator_Basic.lean`)**: Implicit arguments, notations, and typeclass instances can disguise a trivial claim as a standard theorem (`PrettyPrintAndKernelDeep.delabExplicit_injective_and_implicit_spoof`). Always audit final theorem statements under `set_option pp.all true`.
-4. **Hardware Pointer-Tagging Assumption (`lean.h:150-154`)**: During 64-bit small-object deallocation, `lean.h` packs the free-list pointer into `m_rc` (32 bits) + `m_cs_sz` (16 bits) = **48 bits**, which is incompatible with **ARM MTE / HWASAN** top-byte pointer tagging (`lean.h:153-154`, issue `#13113`).
+### A. Six Operational & Production-Kernel Caveats
+1. **Historical `Expr.Data` 20-Bit `panic! → 0` Bug & Lean 4.35.0 Exposed `UInt64` Ceiling (`arXiv:2403.14064` §4.1, `Expr.lean:120-176`)**: Overflowing `looseBVarRange` (`>> 44`) previously called Lean's `panic!`, returning `0 : UInt64` (`looseBVarRange = 0`) and corrupting `cheapBetaReduce` into an exploitable soundness bug (`panic_zero_overflow_corrupts_cheapBetaReduce_and_derives_false`). Lean 4.35.0 aborts in C++ via `@[extern "lean_expr_mk_data"]`, **but** keeps `Expr.Data := UInt64` exposed so `e.looseBVarRange < 2^20` is unconditionally provable and global `looseBVarRange_eq` is refutable (`lean4_435_exposed_exprData_ceiling_artifact`).
+2. **Unchecked Prelude Equations in C++ `reduce_nat` (`arXiv:2403.14064` §3.2.3 fn. 13, `type_checker.cpp:676`)**: Unlike `Lean4Lean` (`lean4lean_nat_add_peano_guard_uniquely_forces_bignum_add`), the C++ kernel matches `` `Nat.add `` by name only; replacing `Init.Prelude` with a spoofed `Nat.add` derives `False` (`cpp_unchecked_prelude_nat_add_derives_false`, `0` axioms).
+3. **`@[implemented_by]` / `@[extern]` + `native_decide` ("Unsound by Design", `arXiv:2403.14064` §3.2.3)**: Unlike `@[csimp]` (`@f = @g`), runtime overrides bypass the kernel and derive `False` under `native_decide` (`ExternAndEmitC.unchecked_implemented_by_derives_false`, `0` axioms).
+4. **Unchecked `.olean` `mmap` & Non-Cryptographic Lake Hashes (`CompactedRegion.lean`, `Lake_Trace.lean:99`)**: `import` mmaps `.olean` regions (`m_rc = 0`) unchecked, and `Lake_Trace.lean:99` uses a 64-bit non-cryptographic `UInt64` hash (`-- TODO: Use a secure hash`). Replay untrusted caches via **`leanchecker --fresh`** and `lean4lean --fresh`.
+5. **Human Statement-Reading / Pollack Spoofing (`Delaborator_Basic.lean`)**: Implicit arguments, notations, and typeclass instances can disguise a trivial claim (`PrettyPrintAndKernelDeep.delabExplicit_injective_and_implicit_spoof`). Always audit final theorem statements under `set_option pp.all true`.
+6. **48-Bit Inline Free-List Pointer (`lean.h:150-154`)**: Packing deletion pointers into `m_rc` (32 bits) + `m_cs_sz` (16 bits) = **48 bits** is incompatible with **ARM MTE / HWASAN** top-byte pointer tagging (`lean.h:153-154`, issue `#13113`).
 
-### B. Two Irreducible Foundational & Physical Limits
-1. **Gödel's Second Incompleteness Theorem (`CoreKernel.universe_bound_blocks_self_reflection`)**: Proving $\text{Lean}_u$ consistent inside $\text{Lean}_{u+1}$ establishes **relative consistency**; full Lean 4 rests mathematically on **$\text{ZFC} + \omega\text{ inaccessible cardinals}$**.
-2. **Specification-to-Binary Gap**: Our 105 theorems verify functional and bit-precise (`BitVec 32`/`64`) models of Lean 4.35.0's C++17/C11/Lean source algorithms, not the compiled machine binary emitted by `clang`/`g++` or `libgmp`—motivating independent cross-checkers (`leanchecker --fresh`, `lean4lean`, `nanoda_lib`).
+### B. Open Full-Lean-4 Metatheoretic Conjectures & Irreducible Limits
+1. **Open Conjectures in `Lean4Lean` (`arXiv:2403.14064` §2.4, §3.2.1, §6, §6.1)**:
+   - **Non-Termination (`Abel–Coquand 2020`)**: Impredicative `Prop` + proof irrelevance + `propext` yields well-typed diverging `whnf` terms (`abel_coquand_well_typed_and_recm_fuel_sound`); ZFC consistency survives, and `RecM` bounds recursion with `fuel`.
+   - **Unique Typing, $\forall$-Inversion & Strengthening (Conjectures 2.7–2.10)**: Step-indexing composes additively ($i + j > \max(i,j)$) under substitution (`step_index_substitution_additive_not_max`), leaving Conjectures 2.7–2.10—needed for full `isDefEq` correctness—as well as mechanized specs for **nested/mutual inductives** (§6) and **structure $\eta$ (`Expr.proj`)** (§6.1) open in `Lean4Lean`.
+2. **Gödel's Second Incompleteness (`CoreKernel.universe_bound_blocks_self_reflection`)**: Proving $\text{Lean}_u$ consistent inside $\text{Lean}_{u+1}$ establishes **relative consistency** to **$\text{ZFC} + \omega\text{ inaccessible cardinals}$**.
+3. **Specification-to-Binary Gap**: Our 115 theorems verify mathematical/`BitVec` models rather than compiled `clang`/`g++`/`libgmp` machine code—motivating cross-checking with both `leanchecker --fresh` and external kernels (`lean4lean`, `nanoda_lib`).
 
 ### C. Practical 4-Step Audit Checklist
 1. **`#print axioms`**: Confirm only `{propext, Classical.choice, Quot.sound}` (or `{}`), with zero `Lean.ofReduceBool`, `sorryAx`, or custom axioms.
-2. **`leanchecker --fresh` (+ External Checker)**: Replay all `.olean`/`.olean.server`/`.olean.private` tiers from scratch (and optionally cross-check in `lean4lean` / `nanoda_lib`).
+2. **`leanchecker --fresh` + `lean4lean --fresh` / `nanoda_lib`**: Replay all `.olean`/`.olean.server`/`.olean.private` tiers from scratch over standard `Init.Prelude` and cross-check in an independent kernel.
 3. **`set_option pp.all true`**: Audit every implicit argument, universe level, and typeclass instance in target theorem statements.
 4. **Foundational Meta-Theory**: Accept the consistency of $\text{ZFC}$ + finitely many Grothendieck universes.
 
