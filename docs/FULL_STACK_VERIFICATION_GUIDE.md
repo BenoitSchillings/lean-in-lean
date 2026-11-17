@@ -113,7 +113,29 @@
 
 ---
 
-## 2. Reproduction Instructions
+## 2. So, Is Lean 4 Correct? — Executive Verdict, Caveats & Foundational Limits
+
+**Architecturally and algorithmically, yes—across all 35 audited Lean 4.35.0 source files, we found zero soundness bugs—provided users remain inside the pure kernel TCB and respect four operational boundaries and two irreducible foundational limits:**
+
+### A. Four Real-World Trust Caveats & Upstream Engineering Limits
+1. **`@[implemented_by]` / `@[extern]` + `native_decide` Bypass the Kernel (`ImplementedByAttr.lean:40`, `Native.lean:37`)**: Unlike `@[csimp]` (which mandates a kernel theorem `@f = @g`), `@[implemented_by]` and `@[extern]` replace runtime code unchecked. Combining a buggy override with `native_decide` (`Lean.ofReduceBool`) derives `False` (`ExternAndEmitC.unchecked_implemented_by_derives_false`, `0` axioms).
+2. **Unchecked `.olean` `mmap` & Non-Cryptographic Lake Hashes (`CompactedRegion.lean`, `Lake_Trace.lean:99`)**: Standard `import` mmaps `.olean` regions (`m_rc = 0`) without kernel re-checking, and `Lake_Trace.lean:99` uses a 64-bit non-cryptographic `UInt64` hash (`-- TODO: Use a secure hash rather than the builtin Lean hash function`). Untrusted caches must be verified with **`leanchecker --fresh`** (`RuntimeAndOlean.runFreshReplay_consistent`).
+3. **Human Statement-Reading / Pollack Spoofing (`Delaborator_Basic.lean`)**: Implicit arguments, notations, and typeclass instances can disguise a trivial claim as a standard theorem (`PrettyPrintAndKernelDeep.delabExplicit_injective_and_implicit_spoof`). Always audit final theorem statements under `set_option pp.all true`.
+4. **Hardware Pointer-Tagging Assumption (`lean.h:150-154`)**: During 64-bit small-object deallocation, `lean.h` packs the free-list pointer into `m_rc` (32 bits) + `m_cs_sz` (16 bits) = **48 bits**, which is incompatible with **ARM MTE / HWASAN** top-byte pointer tagging (`lean.h:153-154`, issue `#13113`).
+
+### B. Two Irreducible Foundational & Physical Limits
+1. **Gödel's Second Incompleteness Theorem (`CoreKernel.universe_bound_blocks_self_reflection`)**: Proving $\text{Lean}_u$ consistent inside $\text{Lean}_{u+1}$ establishes **relative consistency**; full Lean 4 rests mathematically on **$\text{ZFC} + \omega\text{ inaccessible cardinals}$**.
+2. **Specification-to-Binary Gap**: Our 105 theorems verify functional and bit-precise (`BitVec 32`/`64`) models of Lean 4.35.0's C++17/C11/Lean source algorithms, not the compiled machine binary emitted by `clang`/`g++` or `libgmp`—motivating independent cross-checkers (`leanchecker --fresh`, `lean4lean`, `nanoda_lib`).
+
+### C. Practical 4-Step Audit Checklist
+1. **`#print axioms`**: Confirm only `{propext, Classical.choice, Quot.sound}` (or `{}`), with zero `Lean.ofReduceBool`, `sorryAx`, or custom axioms.
+2. **`leanchecker --fresh` (+ External Checker)**: Replay all `.olean`/`.olean.server`/`.olean.private` tiers from scratch (and optionally cross-check in `lean4lean` / `nanoda_lib`).
+3. **`set_option pp.all true`**: Audit every implicit argument, universe level, and typeclass instance in target theorem statements.
+4. **Foundational Meta-Theory**: Accept the consistency of $\text{ZFC}$ + finitely many Grothendieck universes.
+
+---
+
+## 3. Reproduction Instructions
 
 ```bash
 lake build

@@ -13,6 +13,36 @@ This repository contains a self-contained, dependency-free formalization and sou
 
 ---
 
+## So, Is Lean 4 Correct? — Executive Verdict, Caveats & Foundational Limits
+
+**Short answer: Architecturally and algorithmically, yes—across all 35 audited Lean 4.35.0 source files, we found zero soundness bugs—provided you stay inside the pure kernel TCB and respect four well-defined operational boundaries and two irreducible foundational limits.**
+
+### 1. What Is Machine-Checked & Sound (`lean4_seventeen_layer_complete_certificate`)
+Across all **17 architectural layers** (`5,406` lines, `105` theorems, `0` `sorry`s, `0` custom axioms, `0` `Lean.ofReduceBool` circularity):
+- **Core C++ CIC Kernel (`src/kernel/`)**: `imax` impredicativity, universe stratification, strict positivity, `Prop` large-elimination & singleton indexing, `Quot.lift` coherence, fast `reduce_nat` = Peano `Nat` (`type_checker.cpp:629` overflow-free `max / k` guard), and locally-nameless `openBVar`/`closeFVar` are **consistent** (`∀ p, ¬HasType [] p False`).
+- **Frontend, Pretty-Printer & Elaboration**: Pratt right-associative `→` (`rbp = 24`) + minimal-paren `Parenthesizer.lean` prevent Pollack operator spoofing; `MacroScope` hygiene prevents variable capture; `MetaM` `checkAssignment` enforces occurs, `LCtx` scope, depth, and opacity barriers; tabled typeclasses terminate on cycles; `match → casesOn` (`SolveOverlap`) and `FlatOrder.instCCPO` `partial_fixpoint` (`0` axioms) are sound.
+- **Compiler, Perceus RC, `EmitC` & Concurrent `lean.h` Runtime**: `ToMono` erasure preserves observable `Bool`/`Nat` semantics; Perceus `Reset`/`Reuse` is zero-allocation at `rc = 1` and alias-safe at `rc ≥ 2`; `EmitC.lean:732` `_start:` prevents tail-call register clobbering; `Name.mangle` is injective; 64-bit `lean_box` (`n < 2^63`), 32-bit `LEAN_RC_STICKY` overflow freezing (`∀ 2^32`), 7-state `lean_task` `Deactivated` synchronization, and the `4,094`-thread in-flight atomic RC margin prevent use-after-free.
+
+### 2. Four Real-World Trust Caveats & Upstream Engineering Limits
+Even though Lean 4's core design is sound, real-world users can still compromise proofs or encounter upstream engineering limits at **four explicit boundaries**:
+1. **`@[implemented_by]` / `@[extern]` + `native_decide` Bypass the Kernel (`ImplementedByAttr.lean:40`, `Native.lean:37`)**: Unlike `@[csimp]` (which requires a kernel proof `@f = @g`), `@[implemented_by]` and `@[extern]` replace functions in compiled code **unchecked**. Combining a buggy override with `native_decide` (`Lean.ofReduceBool`) derives `False` (`unchecked_implemented_by_derives_false`, `0` axioms).
+2. **Unchecked `.olean` `mmap` & Non-Cryptographic Build Hashes (`CompactedRegion.lean`, `Lake_Trace.lean:99`)**: Standard `import` mmaps `.olean` regions (`m_rc = 0`) straight into memory without kernel re-checking, and Lake's Merkle trace (`Lake_Trace.lean:99`) currently uses a **64-bit non-cryptographic `UInt64` hash** (`-- TODO: Use a secure hash rather than the builtin Lean hash function`). Adversarial or corrupted caches require **`leanchecker --fresh`** (`runFreshReplay_consistent`), which replays all 3 tiers (`.olean`, `.olean.server`, `.olean.private`) from scratch.
+3. **Human Statement-Reading / Pollack Spoofing (`Delaborator_Basic.lean`)**: Implicit arguments, custom notations, and overloaded typeclass instances can make a theorem look standard while proving something trivial (`delabExplicit_injective_and_implicit_spoof`). High-assurance audits must inspect final theorem statements with `set_option pp.all true` (`pp.explicit = true`).
+4. **Hardware Pointer-Tagging Assumption (`lean.h:150-154`)**: During 64-bit small-object deallocation, `lean.h` packs the free-list pointer inline into `m_rc` (32 bits) + `m_cs_sz` (16 bits) = **48 bits**. As documented in `lean.h:153-154` (upstream issue `#13113`), this is incompatible with **ARM MTE / HWASAN** top-byte pointer tagging (`56+` address bits).
+
+### 3. Two Irreducible Foundational & Physical Limits
+1. **Gödel's Second Incompleteness Theorem (`CoreKernel.lean`, `universe_bound_blocks_self_reflection`)**: No consistent system strong enough for arithmetic can prove its own consistency at the same universe strength. Proving $\text{Lean}_u$ consistent inside $\text{Lean}_{u+1}$ establishes **relative consistency**: full Lean 4 rests mathematically on the consistency of **$\text{ZFC} + \omega\text{ inaccessible cardinals}$** (and finite $n$-universe fragments on $\text{ZFC} + n$ inaccessibles).
+2. **Specification-to-Binary Gap (`clang`/`g++`/`libgmp`/Hardware)**: Our 105 theorems verify faithful functional and bit-precise (`BitVec 32`/`64`) specifications of Lean 4.35.0's C++17, C11, and Lean source algorithms—not the compiled x86-64/ARM64 machine binary emitted by an unverified C++ compiler (`clang`/`g++`) or `libgmp` bignum library (unlike CakeML or CompCert). This is why high-assurance projects cross-check exported proofs with independent kernels (`leanchecker --fresh`, `lean4lean`, `nanoda_lib`).
+
+### 4. Practical 4-Step Audit Checklist for High-Assurance Lean 4 Proofs
+To trust a Lean 4 proof with mathematical certainty:
+1. **Audit Axioms**: Run `#print axioms my_theorem` — confirm **only** `{propext, Classical.choice, Quot.sound}` (or `{}`), with **no** `Lean.ofReduceBool` (`native_decide`), `sorryAx`, or custom axioms.
+2. **Replay Fresh & Cross-Check**: Run `leanchecker --fresh` (and optionally an independent external kernel such as `lean4lean` or `nanoda_lib`) so no `.olean` cache or C++ implementation quirk is trusted blindly.
+3. **Audit the Surface Statement**: Inspect the target theorem statement under `set_option pp.all true` (and `pp.universes true`) so notations, coercions, and implicit instances cannot mask a vacuous claim.
+4. **Accept the Foundational Meta-Theory**: Accept the consistency of $\text{ZFC}$ plus finitely many Grothendieck universes.
+
+---
+
 ## Architecture Overview: All 17 Verified Layers
 
 ```mermaid
